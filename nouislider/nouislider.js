@@ -473,6 +473,10 @@
           - The provided value for the option;
           - A reference to the options object;
           - The name for the option;
+<<<<<<< module9-task1
+=======
+
+>>>>>>> master
       The testing function returns false when an error is detected,
       or true when everything is OK. It can also modify the option
       object, to make sure all values can be correctly looped elsewhere. */
@@ -2251,4 +2255,6 @@
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
+
 }));
+

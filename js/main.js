@@ -1,2 +1,7 @@
 import {createPosts} from './data.js';
-createPosts();
+import {renderPicture} from './render.js';
+
+const posts = createPosts();
+for (const post of posts) {
+  renderPicture(post);
+}

@@ -1,9 +1,18 @@
 import { isEscapeKey } from './util.js';
 
+// Selectors for editor view
 const inputImage = document.querySelector('#upload-file');
 const overlayImage = document.querySelector('.img-upload__overlay');
 const closeButton = document.querySelector('#upload-cancel');
 
+// Selectors for hashtags and comment (description) -> Validation
+const form = document.querySelector('.img-upload__form');
+const hashtagInput = form.querySelector('.text__hashtags');
+const commentInput = form.querySelector('.text__description');
+const submitButton = form.querySelector('.img-upload__submit');
+
+
+// Editor view
 const closeOverlayImage = () => {
   inputImage.value = '';
   overlayImage.classList.add('hidden');
@@ -22,23 +31,16 @@ inputImage.addEventListener('change', (evt) => {
 });
 
 function onOverlayEscKeydown(evt) {
-  if (isEscapeKey(evt)) {
+  if (isEscapeKey(evt) && evt.target !== hashtagInput && evt.target !== commentInput) {
     evt.preventDefault();
     closeOverlayImage();
   }
 }
 
+
 // Validation of hashtags and comment
-
-const form = document.querySelector('.img-upload__form');
-const hashtagInput = form.querySelector('.text__hashtags');
-const commentInput = form.querySelector('.text__description');
-const submitButton = form.querySelector('.img-upload__submit');
-
 let boolHashtagGlobal = true;
 let boolCommentGlobal = true;
-
-// TODO: `add stopProgagation for hashtags and comment
 
 const pristine = new Pristine(form, {
   classTo: 'text',
@@ -49,6 +51,8 @@ const pristine = new Pristine(form, {
   errorTextClass: 'text__error'
 }, true);
 
+
+// If one of them doesn't match, submission (button) is disabled
 const controlSubmit = () => {
   if (!boolHashtagGlobal || !boolCommentGlobal) {
     submitButton.setAttribute('disabled', 'false');

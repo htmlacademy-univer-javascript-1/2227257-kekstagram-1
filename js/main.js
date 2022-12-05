@@ -1,3 +1,4 @@
+
 const DESCRIPTIONS = [
   'Cool',
   'Nice',
@@ -105,3 +106,5 @@ const testFun = function() {
 };
 
 testFun(arrayOfPosts);
+
+

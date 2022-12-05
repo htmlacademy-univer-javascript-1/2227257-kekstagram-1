@@ -1,6 +1,6 @@
-import {createPosts} from './data.js';
-import {renderPicture} from './render.js';
-import {openBigPicture} from './view-window.js';
+import { createPosts } from './data.js';
+import { renderPicture } from './render.js';
+import { openBigPicture } from './view-window.js';
 import './image-upload.js';
 
 const posts = createPosts();

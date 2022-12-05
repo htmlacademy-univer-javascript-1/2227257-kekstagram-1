@@ -36,7 +36,27 @@ const NAMES = [
 const MESSAGES = [
   'Everything is great!',
   'I am the first!',
-  'My grandmother takes better pictures.'
+  'My grandmother takes better pictures.',
+  'It\'s very nice',
+  'Wow! Cool, dude!',
+  'It\'s the best photo I\'ve ever seen in my life',
+  'What is it?',
+  'Very similar to you!',
+  'Wonderful!',
+  'Wow, it\'s fire',
+  'Interesting to read you)',
+  'Masterpiece',
+  ':3',
+  ':)',
+  ':(',
+  ';(',
+  'Applause)',
+  'Post photos more often!',
+  'I always look forward to your posts',
+  'You again!?',
+  'Why is this in my recommendations again?',
+  'Don\'t take your camera anymore',
+  'Your photo is so horrible that my speechless friend screamed when he saw it'
 ];
 
 const NUMBER_POSTS = 25;
@@ -61,7 +81,7 @@ const createComment = () => ({
 });
 
 const createComments = () => {
-  const numberComments = getRandomNumber(1, 3);
+  const numberComments = getRandomNumber(4, 16);
   const comments = Array(numberComments);
   for (let i = 0; i < numberComments; i++) {
     comments[i] = createComment();

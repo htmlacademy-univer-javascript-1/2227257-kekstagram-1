@@ -61,9 +61,9 @@ const createComment = () => ({
 });
 
 const createComments = () => {
-  const number = getRandomNumber(1, 3);
-  const comments = Array(number);
-  for (let i = 0; i < number; i++) {
+  const numberComments = getRandomNumber(1, 3);
+  const comments = Array(numberComments);
+  for (let i = 0; i < numberComments; i++) {
     comments[i] = createComment();
   }
   return comments;

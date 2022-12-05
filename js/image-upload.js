@@ -1,6 +1,8 @@
 import { isEscapeKey } from './util.js';
+import { sendData } from './api.js';
 
 //// Selectors for editor view
+const windowBody = document.querySelector('body');
 const inputImage = document.querySelector('#upload-file');
 const overlayImage = document.querySelector('.img-upload__overlay');
 const closeButton = document.querySelector('#upload-cancel');
@@ -24,6 +26,11 @@ const hashtagInput = form.querySelector('.text__hashtags');
 const commentInput = form.querySelector('.text__description');
 const submitButton = form.querySelector('.img-upload__submit');
 
+//// Selectors for state of submission
+const successfulSubmission = document.querySelector('#success').content.querySelector('.success');
+const erroneousSubmission = document.querySelector('#error').content.querySelector('.error');
+const successButton = successfulSubmission.querySelector('.success__button');
+const errorButton = erroneousSubmission.querySelector('.error__button');
 
 //// Editor view
 
@@ -48,7 +55,8 @@ const closeOverlayImage = () => {
 };
 
 function onOverlayEscKeydown(evt) {
-  if (isEscapeKey(evt) && evt.target !== hashtagInput && evt.target !== commentInput) {
+  if (isEscapeKey(evt) && evt.target !== hashtagInput
+    && evt.target !== commentInput && !windowBody.contains(erroneousSubmission)) {
     evt.preventDefault();
     closeOverlayImage();
   }
@@ -244,7 +252,75 @@ pristine.addValidator(
   'Комментарий не должен превышать 140 символов'
 );
 
+const blockSubmitButton = () => {
+  submitButton.disabled = true;
+  submitButton.textContent = 'Опубликовываю...';
+};
+
+const unblockSubmitButton = () => {
+  submitButton.disabled = false;
+  submitButton.textContent = 'Опубликовать';
+};
+
+const closeMessages = () => {
+  document.removeEventListener('keydown', escMessage);
+  if (windowBody.contains(successfulSubmission)) {
+    windowBody.removeChild(successfulSubmission);
+    document.removeEventListener('click', closeSuccessMessage);
+    successButton.removeEventListener('click', closeMessages);
+  }
+  if (windowBody.contains(erroneousSubmission)) {
+    errorButton.removeEventListener('click', closeMessages);
+    document.removeEventListener('click', closeErrorMessage);
+    overlayImage.classList.remove('hidden');
+    windowBody.removeChild(erroneousSubmission);
+  }
+};
+
+function closeSuccessMessage(evt) {
+  if (evt.target === successfulSubmission) {
+    closeMessages();
+  }
+}
+
+function closeErrorMessage(evt) {
+  if (evt.target === erroneousSubmission) {
+    closeMessages();
+  }
+}
+
+function escMessage(evt) {
+  if (isEscapeKey(evt)) {
+    closeMessages();
+  }
+}
+
 function submitListener(evt) {
   evt.preventDefault();
-  pristine.validate();
+
+  const isValid = pristine.validate();
+  if (isValid) {
+    blockSubmitButton();
+    sendData(
+      () => {
+        closeOverlayImage();
+        unblockSubmitButton();
+        successButton.addEventListener('click', closeMessages);
+        document.addEventListener('keydown', escMessage);
+        document.addEventListener('click', closeSuccessMessage);
+        windowBody.appendChild(successfulSubmission);
+      },
+      () => {
+        overlayImage.classList.add('hidden');
+        unblockSubmitButton();
+        errorButton.addEventListener('click', closeMessages);
+        document.addEventListener('keydown', escMessage);
+        document.addEventListener('click', closeErrorMessage);
+        windowBody.appendChild(erroneousSubmission);
+      },
+      new FormData(evt.target),
+    );
+  }
 }
+
+export { closeOverlayImage };

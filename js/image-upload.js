@@ -11,7 +11,7 @@ const closeButton = document.querySelector('#upload-cancel');
 const buttonScaleSmaller = overlayImage.querySelector('.scale__control--smaller');
 const buttonScaleBigger = overlayImage.querySelector('.scale__control--bigger');
 const scaleControl = overlayImage.querySelector('.scale__control--value');
-const editedPicture = overlayImage.querySelector('.img-upload__preview');
+const editedPicture = overlayImage.querySelector('.img-upload__preview').querySelector('img');
 
 // Effects
 const effects = overlayImage.querySelector('.effects__list');
@@ -34,16 +34,33 @@ const errorButton = erroneousSubmission.querySelector('.error__button');
 
 //// Editor view
 
-const closeOverlayImage = () => {
+const setValues = () => {
+  checkedBox = 'effect-none';
+  fieldSlider.classList.add('hidden');
+  scaleControl.value = `${100}%`;
+  editedPicture.style.transform = `scale(${1})`;
+};
+
+const resetValues = () => {
   inputImage.value = '';
+  hashtagInput.value = '';
+  commentInput.value = '';
+  editedPicture.className = '';
+  scaleControl.value = `${100}%`;
+  editedPicture.style.transform = `scale(${1})`;
+  const errors = document.querySelectorAll('.text__error');
+  for (const error of errors) {
+    error.textContent = '';
+  }
+  slider.noUiSlider.destroy();
+};
+
+const closeOverlayImage = () => {
   overlayImage.classList.add('hidden');
   document.body.classList.remove('modal-open');
   document.removeEventListener('keydown', onOverlayEscKeydown);
   closeButton.removeEventListener('click', closeOverlayImage);
 
-  // TODO: `remove text error when upload form appears second time
-  hashtagInput.value = '';
-  commentInput.value = '';
   submitButton.removeAttribute('disabled', 'true');
   form.removeEventListener('submit', submitListener);
 
@@ -51,7 +68,7 @@ const closeOverlayImage = () => {
   buttonScaleSmaller.removeEventListener('click', changeScale);
 
   effects.removeEventListener('change', effectPicture);
-  slider.noUiSlider.destroy();
+  resetValues();
 };
 
 function onOverlayEscKeydown(evt) {
@@ -64,7 +81,7 @@ function onOverlayEscKeydown(evt) {
 
 function changeScale(evt) {
   const scaleValue = scaleControl.value.replace('%', '');
-  if (evt.target === buttonScaleSmaller && scaleValue > 0) {
+  if (evt.target === buttonScaleSmaller && scaleValue > 25) {
     scaleControl.value = `${parseInt(scaleValue, 10) - 25}%`;
     editedPicture.style.transform = `scale(${(parseInt(scaleValue, 10) - 25) / 100})`;
   } else if (evt.target === buttonScaleBigger && scaleValue < 100) {
@@ -80,36 +97,43 @@ function effectPicture(evt) {
   let currentMax = 100;
   let currentStart = 100;
   let currentStep = 1;
+  let effectClass;
   switch (evt.target.id) {
     case 'effect-chrome':
       currentMin = 0;
       currentMax = 1;
       currentStep = 0.1;
       currentStart = 1;
+      effectClass = 'effects__preview--none';
       break;
     case 'effect-sepia':
       currentMin = 0;
       currentMax = 1;
-      currentStep = 0.1;
+      currentStep =
+        0.1;
       currentStart = 1;
+      effectClass = 'effects__preview--chrome';
       break;
     case 'effect-marvin':
       currentMin = 0;
       currentMax = 100;
       currentStep = 1;
       currentStart = 100;
+      effectClass = 'effects__preview--sepia';
       break;
     case 'effect-phobos':
       currentMin = 0;
       currentMax = 3;
       currentStep = 0.1;
       currentStart = 3;
+      effectClass = 'effects__preview--marvin';
       break;
     case 'effect-heat':
       currentMin = 1;
       currentMax = 3;
       currentStep = 0.1;
       currentStart = 3;
+      effectClass = 'effects__preview--heat';
       break;
   }
   slider.noUiSlider.updateOptions({
@@ -125,11 +149,7 @@ function effectPicture(evt) {
   } else {
     fieldSlider.classList.add('hidden');
   }
-  // TODO: `why do we need this?
-  editedPicture.className = 'img-upload__preview';
-  const effectPreview = evt.target.parentNode.querySelector('.effects__preview');
-  editedPicture.classList.add(effectPreview.getAttribute('class').split('  ')[1]);
-  // If we use css styles, then maybe adding classes is not necessary?
+  editedPicture.className = effectClass;
 }
 
 // Effect intensity
@@ -162,21 +182,20 @@ const effectIntens = () => {
 };
 
 inputImage.addEventListener('change', (evt) => {
+  evt.preventDefault();
+
+  setValues();
+
   document.addEventListener('keydown', onOverlayEscKeydown);
 
   closeButton.addEventListener('click', closeOverlayImage);
 
-  scaleControl.value = `${100}%`;
-  editedPicture.style.transform = `scale(${1})`;
   buttonScaleSmaller.addEventListener('click', changeScale);
   buttonScaleBigger.addEventListener('click', changeScale);
 
   editedPicture.classList.add('effects__preview--none');
   effects.addEventListener('change', effectPicture);
 
-  checkedBox = 'effect-none';
-  editedPicture.className = 'img-upload__preview';
-  fieldSlider.classList.add('hidden');
   noUiSlider.create(slider, {
     range: {
       min: 0,
@@ -188,7 +207,6 @@ inputImage.addEventListener('change', (evt) => {
     effectIntens();
   });
 
-  evt.preventDefault();
   form.addEventListener('submit', submitListener);
   document.body.classList.add('modal-open');
   overlayImage.classList.remove('hidden');
@@ -201,16 +219,14 @@ let boolHashtagGlobal = true;
 let boolCommentGlobal = true;
 
 const pristine = new Pristine(form, {
-  classTo: 'text',
-  errorClass: 'text--invalid',
-  successClass: 'text-valid',
-  errorTextParent: 'text',
+  classTo: 'img-upload__field-wrapper',
+  errorClass: 'img-upload__field-wrapper--invalid',
+  successClass: 'img-upload__field-wrapper-valid',
+  errorTextParent: 'img-upload__field-wrapper',
   errorTextTag: 'div',
   errorTextClass: 'text__error'
 }, true);
 
-
-// If one of them doesn't match, submission (button) is disabled
 const controlSubmit = () => {
   if (!boolHashtagGlobal || !boolCommentGlobal) {
     submitButton.setAttribute('disabled', 'true');
@@ -225,6 +241,15 @@ const isCorrectHashtag = (value) => regHashtag.test(value);
 
 const validateHashtag = (value) => {
   const hashtags = value.split(' ');
+  const copyHashtags = new Set();
+  for (const hashtag of hashtags) {
+    copyHashtags.add(hashtag.toLowerCase());
+  }
+  if (copyHashtags.size < hashtags.length || hashtags.length > 5) {
+    boolHashtagGlobal = false;
+    controlSubmit();
+    return false;
+  }
   const bool = hashtags.every(isCorrectHashtag);
   boolHashtagGlobal = bool;
   controlSubmit();
